@@ -18,8 +18,8 @@ import java.util.Locale;
 public class Notepad extends AppCompatActivity implements TextWatcher{
     private EditText mMemo;
     private MyDatabaseHelper helper;
-    private String mMemoData;
     private SQLiteDatabase db;
+    private String mMemoData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,6 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
 
         mMemo = (EditText) findViewById(R.id.edt_memo);
         mMemo.addTextChangedListener(this);
-        helper = new MyDatabaseHelper(this);
         hideActionBar();
 
     }
@@ -38,11 +37,11 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
 
     }
 
-    private String getDateTime() {
+    private String getDate() {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy MM dd", Locale.getDefault());
         Date date = new Date();
-        return dateFormat.format(date);
+        return dateFormat.format(date); //TODO : 월 화수목금토일 넣기
     }
 
     public boolean checkDataIsNull() {
@@ -86,27 +85,14 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
 //    }
 
     public void insertDataIntoDB(String text) {
+        helper = new MyDatabaseHelper(getApplicationContext());
         db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
 
-        values.put("date", getDateTime());
+        values.put("date", getDate());
         values.put("text", text);
         db.insert(helper.getDatabaseName(), null, values);
-    }
-
-    public void selectDataIntoDB() {
-        db = helper.getReadableDatabase();
-        Cursor c = db.query(helper.getDatabaseName(), null, null, null, null, null, null);
-        int dateIndex = c.getColumnIndex("date");
-        int textIndex = c.getColumnIndex("text");
-
-        c.moveToFirst();
-        do {
-            String date = c.getString(dateIndex);
-            String text = c.getString(textIndex);
-            Log.i("데이터베이스 내용", "날짜:"+date+"memo:"+text);
-        } while (c.moveToNext());
     }
 
     @Override

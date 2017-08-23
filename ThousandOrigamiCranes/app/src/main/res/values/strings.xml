@@ -2,4 +2,13 @@
     <string name="app_name">ThousandOrigamiCranes</string>
     <string name="btn_fill_the_bottle">채워넣기</string>
     <string name="edt_write_something">내용을 입력해주세요</string>
+    <string name="write_something">학 한마리 접어보세요</string>
+    <string name="MON">월</string>
+    <string name="TUE">화</string>
+    <string name="WED">수</string>
+    <string name="THU">목</string>
+    <string name="FRI">금</string>
+    <string name="SAT">토</string>
+    <string name="SUN">일</string>
+
 </resources>

@@ -2,6 +2,7 @@ package com.example.jack.thousandorigamicranes;
 
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,17 +14,26 @@ import java.util.ArrayList;
 
 class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
-    private ArrayList mDataset;
+    private ArrayList<ListViewItem> mDataset;
 
     // 1. 어뎁터에서 데이터를 받는다
-    public Adapter(ArrayList myDataset) {
+    public Adapter(ArrayList<ListViewItem> myDataset) {
         mDataset = myDataset;
     }
 
     // 2. 뷰가 처음 생성시 만들어준다
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_contents, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_view_date, parent, false);
+
+        switch (viewType) {
+            case 0 :
+                break;
+            case 1 :
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_view_memo, parent, false);
+                break;
+
+        }
         return new ViewHolder(v);
     }
 
@@ -31,9 +41,13 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     //recyclerview에서는 getView와 같은용도
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.textView.setText("test"); //TODO : database에서 불러오기
-        //TODO : 날짜가 같은지 판별하는 if문 넣어서 다르면 날짜 표시하는 뷰 생성 후 text뷰 만들기 같으면 text뷰만 생성
-        setAnimation(holder.textView);
+        if (mDataset.get(position).getType() == 0) {
+            holder.date.setText(mDataset.get(position).getDate());
+            setAnimation(holder.date);
+        } else if (mDataset.get(position).getType() == 1) {
+            holder.textView.setText(mDataset.get(position).getMemo());
+            setAnimation(holder.textView);
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -42,22 +56,32 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return mDataset.size();
     }
 
+
+
+    @Override
+    public int getItemViewType(int position) {
+        Log.i("뷰타입", Integer.toString(mDataset.get(position).getType()));
+        return mDataset.get(position).getType();
+    }
+
+
+
     //viewholder 만들기 필수!!
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView textView;
+        public TextView date;
 
-        public ViewHolder(View view) {
-            super(view);
-            textView = view.findViewById(R.id.text_memo);
+        public ViewHolder(View v) {
+            super(v);
+            textView = v.findViewById(R.id.text_memo);
+            date = v.findViewById(R.id.text_date);
         }
     }
 
-    //엑티비티 실행시, 새로 생성시 옆에서 나타나는 에니메이션
+//    엑티비티 실행시, 새로 생성시 옆에서 나타나는 에니메이션
     private void setAnimation(View viewToAnimate) {
         Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(), android.R.anim.slide_in_left);
         viewToAnimate.startAnimation(animation);
-
-        return;
     }
 }
 
