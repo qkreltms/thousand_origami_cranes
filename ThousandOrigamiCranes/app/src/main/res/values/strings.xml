@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ThousandOrigamiCranes</string>
+    <string name="btn_fill_the_bottle">채워넣기</string>
+    <string name="edt_write_something">내용을 입력해주세요</string>
+</resources>
