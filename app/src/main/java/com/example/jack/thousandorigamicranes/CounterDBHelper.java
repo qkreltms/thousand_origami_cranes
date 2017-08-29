@@ -14,9 +14,9 @@ public class CounterDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "CounterDB";
     private static final int DATABASE_VERSION = 1;
     private static final String ID = "id";
-    private static final String DATE = "date";
-    private static final String TEXT = "text";
-    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS " + DATABASE_NAME + "(" + ID + " INTEGER PRIMARY KEY, " + DATE + " DATETIME, " + TEXT + " TEXT);";
+    private static final String COUNTER = "counter";
+    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS " + DATABASE_NAME + "(" + ID + " INTEGER PRIMARY KEY, " + COUNTER + " INTEGER);";
+    private static int counter = 0;
 
     public CounterDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -45,7 +45,20 @@ public class CounterDBHelper extends SQLiteOpenHelper {
         return ID;
     }
 
-    public String getTextFieldName() {
-        return TEXT;
+    public String getCounterFieldName() {
+        return COUNTER;
+    }
+
+    public void addCounter() {
+        counter++;
+        Log.i("카운터 횟수", Integer.toString(counter));
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setCounter(int num) {
+        counter = num;
     }
 }

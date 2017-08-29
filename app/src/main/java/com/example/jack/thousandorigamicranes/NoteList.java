@@ -2,6 +2,7 @@ package com.example.jack.thousandorigamicranes;
 
 import android.annotation.TargetApi;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,35 +23,39 @@ public class NoteList extends AppCompatActivity {
     private static Adapter mAdapter;
     private static ArrayList<ListViewItem> mList;
     private RecyclerView mListView;
-    static MyDatabaseHelper helper;
+    static MyDatabaseHelper myDatabaseHelper;
     static SQLiteDatabase db;
+    static CounterDBHelper counterDBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_list);
 
-        helper = new MyDatabaseHelper(getApplicationContext());
-        db = helper.getReadableDatabase();
+        Context context = getApplicationContext();
+        counterDBHelper = new CounterDBHelper(context);
+        myDatabaseHelper = new MyDatabaseHelper(context);
+        db = myDatabaseHelper.getReadableDatabase();
         mList = new ArrayList<>();
         mList = initList();
         mAdapter = new Adapter(mList);
         mListView = (RecyclerView) findViewById(R.id.list_show_memo);
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
+        //TODO : 카운터 업데이트(삭제시)
+//        db.execSQL("DELETE FROM Memo");
         updateAdapter();
         hideActionBar();
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(new LinearLayoutManager(this));
+        Log.i("카운터", Integer.toString(counterDBHelper.getCounter()));
     }
 
     public static ArrayList<ListViewItem> initList() {
-        ArrayList<ListViewItem> temp = selectAllFromDB();
+        ArrayList<ListViewItem> temp = selectDB();
         ArrayList<ListViewItem> list = new ArrayList<>();
         int tempSize = temp.size()-1;
 
@@ -72,22 +77,6 @@ public class NoteList extends AppCompatActivity {
 
     public static ListViewItem addItem(int id, @Nullable String memo, @Nullable String date, int type) {
         return  new ListViewItem(id, memo, date, type);
-    }
-
-    public static ArrayList<ListViewItem> selectAllFromDB() {
-        Cursor c = db.query(helper.getDatabaseName(), null, null, null, null, null, null);
-        int dateIndex = c.getColumnIndex("date");
-        int textIndex = c.getColumnIndex("text");
-        int idIndex = c.getColumnIndex("id");
-        ArrayList<ListViewItem> list = new ArrayList<>();
-        if (c.moveToFirst()) {
-            do {
-                list.add(new ListViewItem(Integer.valueOf(c.getString(idIndex)), c.getString(textIndex), c.getString(dateIndex)));
-            } while (c.moveToNext());
-        }
-        c.close();
-
-        return list;
     }
 
     public void hideActionBar() {
@@ -130,17 +119,33 @@ public class NoteList extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
     public static void deleteDB(int position) {
-        db = helper.getWritableDatabase();
+        db = myDatabaseHelper.getWritableDatabase();
         String id = Integer.toString(mList.get(position).getId());
-        db.delete(helper.getDatabaseName(), helper.getIdFieldName() + "=" + id, null);
-        Log.i(helper.getDatabaseName(), mList.get(position).getId() + " : " + mList.get(position).getMemo() + "정상적으로 삭제 되었습니다.");
+        db.delete(myDatabaseHelper.getDatabaseName(), myDatabaseHelper.getIdFieldName() + "=" + id, null);
+        Log.i(myDatabaseHelper.getDatabaseName(), mList.get(position).getId() + " : " + mList.get(position).getMemo() + "정상적으로 삭제 되었습니다.");
     }
 
     public static void updateDB (int position, String memo) {
-        db = helper.getWritableDatabase();
+        db = myDatabaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(helper.getTextFieldName(), memo);    //age 값을 수정
-        db.update(helper.getDatabaseName(), values, helper.getIdFieldName() + "=" + mList.get(position).getId(), null);
-        Log.i(helper.getDatabaseName(), mList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
+        values.put(myDatabaseHelper.getTextFieldName(), memo);
+        db.update(myDatabaseHelper.getDatabaseName(), values, myDatabaseHelper.getIdFieldName() + "=" + mList.get(position).getId(), null);
+        Log.i(myDatabaseHelper.getDatabaseName(), mList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
+    }
+
+    public static ArrayList<ListViewItem> selectDB() {
+        Cursor c = db.query(myDatabaseHelper.getDatabaseName(), null, null, null, null, null, null);
+        int dateIndex = c.getColumnIndex("date");
+        int textIndex = c.getColumnIndex("text");
+        int idIndex = c.getColumnIndex("id");
+        ArrayList<ListViewItem> list = new ArrayList<>();
+        if (c.moveToFirst()) {
+            do {
+                list.add(new ListViewItem(Integer.valueOf(c.getString(idIndex)), c.getString(textIndex), c.getString(dateIndex)));
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return list;
     }
 }

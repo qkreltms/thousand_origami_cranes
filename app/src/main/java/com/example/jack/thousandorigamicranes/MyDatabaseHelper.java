@@ -8,7 +8,7 @@ import android.util.Log;
 public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Memo";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String ID = "id";
     private static final String DATE = "date";
     private static final String TEXT = "text";
@@ -26,11 +26,14 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        Log.w(MyDatabaseHelper.class.getName(),
-                "Upgrading database from version " + oldVersion + " to "
-                        + newVersion + ", which will destroy all old data");
+        Log.w(MyDatabaseHelper.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + DATABASE_NAME);
         onCreate(database);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        super.onDowngrade(db, oldVersion, newVersion);
     }
 
     public String getDatabaseName() {
@@ -39,6 +42,10 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     public String getIdFieldName() {
         return ID;
+    }
+
+    public String getDateFieldName() {
+        return DATE;
     }
 
     public String getTextFieldName() {

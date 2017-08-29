@@ -17,6 +17,7 @@ import java.util.Locale;
 public class Notepad extends AppCompatActivity implements TextWatcher {
     private EditText mMemo;
     private String mMemoData;
+    private CounterDBHelper counterDBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +26,17 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 
         mMemo = (EditText) findViewById(R.id.edt_memo);
         mMemo.addTextChangedListener(this);
+        counterDBHelper = new CounterDBHelper(this);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+//        SQLiteDatabase db = counterDBHelper.getWritableDatabase();
+//        db.execSQL("DELETE FROM CounterDB");
         setTextIfUpdate();
+        hideActionBar();
     }
 
     public void setTextIfUpdate() {
@@ -42,13 +52,6 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        hideActionBar();
-    }
-
     public void hideActionBar() {
         getSupportActionBar().hide(); //TODO : theme 바꾸면 된다는데 자세히 알아보기
     }
@@ -61,15 +64,15 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     }
 
     public boolean checkDataIsNull() {
-        return (mMemoData != null && mMemoData.length() > 0);
+        return (mMemoData == null);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (!checkDataIsNull()) {
-            if (!isUpdate()) {
-                insertDataIntoDB(mMemoData);
+        if (! checkDataIsNull()) {
+            if (! isUpdate()) {
+                insertIntoDB(mMemoData);
             } else {
                 int position = Integer.parseInt(getIntent().getStringArrayExtra("update")[1]);
                 NoteList.updateDB(position, mMemoData);
@@ -81,14 +84,42 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         return getIntent().hasExtra("update");
     }
 
-    public void insertDataIntoDB(String text) {
+    public void insertIntoDB(String text) {
         MyDatabaseHelper helper = new MyDatabaseHelper(getApplicationContext());
         SQLiteDatabase db = helper.getWritableDatabase();
-
         ContentValues values = new ContentValues();
 
-        values.put("date", getDate());
-        values.put("text", text);
+        values.put(helper.getDateFieldName(), getDate());
+        values.put(helper.getTextFieldName(), text);
+        db.insert(helper.getDatabaseName(), null, values);
+
+        selectCounterDB();
+        counterDBHelper.addCounter();
+        insertIntoCounterDB();
+    }
+
+    public void selectCounterDB() {
+        SQLiteDatabase db = counterDBHelper.getReadableDatabase();
+        Cursor c = db.query(counterDBHelper.getDatabaseName(), null, null, null, null, null, null);
+        int counterIndex = c.getColumnIndex(counterDBHelper.getCounterFieldName());
+//TODO : 하나만 가져오기
+        int counter;
+        if (c.moveToFirst()) {
+            while (c.moveToNext()) {
+                counter = Integer.valueOf(c.getString(counterIndex));
+                counterDBHelper.setCounter(counter);
+            }
+        }
+        c.close();
+
+    }
+
+    public void insertIntoCounterDB() {
+        CounterDBHelper helper = new CounterDBHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(helper.getCounterFieldName(), counterDBHelper.getCounter());
         db.insert(helper.getDatabaseName(), null, values);
     }
 
