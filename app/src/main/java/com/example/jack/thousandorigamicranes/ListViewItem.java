@@ -6,9 +6,25 @@ package com.example.jack.thousandorigamicranes;
 
 public class ListViewItem {
 
+    private int mId;
     private String mDate;
     private String mMemo;
     private int mType;
+
+    public ListViewItem(int id, String memo, String date, int type) {
+        mId = id;
+        mDate = date;
+        mMemo = memo;
+        mType = type;
+    }
+
+    public ListViewItem(int id, String memo, String date) {
+        mId = id;
+        mDate = date;
+        mMemo = memo;
+    }
+
+    public void setId(int id) { mId = id; }
 
     public void setType(int type) {
         mType = type;
@@ -30,7 +46,7 @@ public class ListViewItem {
         return mMemo;
     }
 
-    public int getType() {
-        return mType;
-    }
+    public int getType() { return mType; }
+
+    public int getId() { return mId; }
 }

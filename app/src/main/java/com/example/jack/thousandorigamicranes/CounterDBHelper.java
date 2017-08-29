@@ -5,28 +5,32 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class MyDatabaseHelper extends SQLiteOpenHelper {
+/**
+ * Created by jack on 2017-08-29.
+ */
 
-    private static final String DATABASE_NAME = "Memo";
+public class CounterDBHelper extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "CounterDB";
     private static final int DATABASE_VERSION = 1;
     private static final String ID = "id";
     private static final String DATE = "date";
     private static final String TEXT = "text";
-    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS "+DATABASE_NAME +  "("+ID+" INTEGER PRIMARY KEY, "+DATE+" DATETIME, "+TEXT+" TEXT);";
+    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS " + DATABASE_NAME + "(" + ID + " INTEGER PRIMARY KEY, " + DATE + " DATETIME, " + TEXT + " TEXT);";
 
-    public MyDatabaseHelper(Context context) {
+    public CounterDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(DATABASE_CREATE);
-        Log.w(MyDatabaseHelper.class.getName(), "table " + DATABASE_NAME + " has created");
+        Log.w(com.example.jack.thousandorigamicranes.MyDatabaseHelper.class.getName(), "table " + DATABASE_NAME + " has created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        Log.w(MyDatabaseHelper.class.getName(),
+        Log.w(com.example.jack.thousandorigamicranes.MyDatabaseHelper.class.getName(),
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + DATABASE_NAME);

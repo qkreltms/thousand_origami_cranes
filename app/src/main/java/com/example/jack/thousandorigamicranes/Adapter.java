@@ -1,13 +1,7 @@
 package com.example.jack.thousandorigamicranes;
 
-
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -47,21 +41,13 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>  {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         if (mDataset.get(position).getType() == 0) {
             holder.date.setText(mDataset.get(position).getDate());
-            holder.date.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    NoteList.showMenu(view, position);
-                    Toast.makeText(view.getContext(), Integer.toString(position), Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
             setAnimation(holder.date);
         } else if (mDataset.get(position).getType() == 1) {
             holder.textView.setText(mDataset.get(position).getMemo());
             holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    NoteList.showMenu(view, position);
+                    NoteList.showPopUpMenu(view, position);
                     Toast.makeText(view.getContext(), Integer.toString(position), Toast.LENGTH_SHORT).show();
                     return false;
                 }

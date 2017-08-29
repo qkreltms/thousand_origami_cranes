@@ -14,11 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-//TODO : 키보드 위로 에디트 텍스터 이동
-public class Notepad extends AppCompatActivity implements TextWatcher{
+public class Notepad extends AppCompatActivity implements TextWatcher {
     private EditText mMemo;
-    private MyDatabaseHelper helper;
-    private SQLiteDatabase db;
     private String mMemoData;
 
     @Override
@@ -28,13 +25,32 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
 
         mMemo = (EditText) findViewById(R.id.edt_memo);
         mMemo.addTextChangedListener(this);
-        hideActionBar();
 
+        setTextIfUpdate();
+    }
+
+    public void setTextIfUpdate() {
+        if (getIntent().hasExtra("update")) {
+            setTextAtNotepad();
+        }
+    }
+
+    public void setTextAtNotepad() {
+        String memo = getIntent().getStringArrayExtra("update")[0];
+        if (memo.length() > 0) {
+            mMemo.setText(memo);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        hideActionBar();
     }
 
     public void hideActionBar() {
-        getSupportActionBar().hide();
-
+        getSupportActionBar().hide(); //TODO : theme 바꾸면 된다는데 자세히 알아보기
     }
 
     private String getDate() {
@@ -45,24 +61,29 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
     }
 
     public boolean checkDataIsNull() {
-        if (mMemoData != null && mMemoData.length() > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return (mMemoData != null && mMemoData.length() > 0);
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (! checkDataIsNull()) {
-            insertDataIntoDB(mMemoData);
+        if (!checkDataIsNull()) {
+            if (!isUpdate()) {
+                insertDataIntoDB(mMemoData);
+            } else {
+                int position = Integer.parseInt(getIntent().getStringArrayExtra("update")[1]);
+                NoteList.updateDB(position, mMemoData);
+            }
         }
     }
 
+    public boolean isUpdate() {
+        return getIntent().hasExtra("update");
+    }
+
     public void insertDataIntoDB(String text) {
-        helper = new MyDatabaseHelper(getApplicationContext());
-        db = helper.getWritableDatabase();
+        MyDatabaseHelper helper = new MyDatabaseHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
 
@@ -79,7 +100,6 @@ public class Notepad extends AppCompatActivity implements TextWatcher{
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         mMemoData = String.valueOf(charSequence);
-        //TODO save data
     }
 
     @Override
