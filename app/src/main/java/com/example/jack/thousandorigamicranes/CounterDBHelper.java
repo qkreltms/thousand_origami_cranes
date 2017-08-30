@@ -25,12 +25,12 @@ public class CounterDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(DATABASE_CREATE);
-        Log.w(com.example.jack.thousandorigamicranes.MyDatabaseHelper.class.getName(), "table " + DATABASE_NAME + " has created");
+        Log.w(com.example.jack.thousandorigamicranes.CounterDBHelper.class.getName(), "table " + DATABASE_NAME + " has created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        Log.w(com.example.jack.thousandorigamicranes.MyDatabaseHelper.class.getName(),
+        Log.w(com.example.jack.thousandorigamicranes.CounterDBHelper.class.getName(),
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + DATABASE_NAME);
@@ -51,7 +51,12 @@ public class CounterDBHelper extends SQLiteOpenHelper {
 
     public void addCounter() {
         counter++;
-        Log.i("카운터 횟수", Integer.toString(counter));
+        Log.i("카운터 횟수 추가", Integer.toString(counter));
+    }
+
+    public void subCounter() {
+        counter--;
+        Log.i("카운터 횟수 삭제", Integer.toString(counter));
     }
 
     public int getCounter() {

@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.EditText;
 
 import java.text.SimpleDateFormat;
@@ -72,7 +71,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         super.onBackPressed();
         if (! checkDataIsNull()) {
             if (! isUpdate()) {
-                insertIntoDB(mMemoData);
+                insertAndCountNote(mMemoData);
             } else {
                 int position = Integer.parseInt(getIntent().getStringArrayExtra("update")[1]);
                 NoteList.updateDB(position, mMemoData);
@@ -84,25 +83,29 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         return getIntent().hasExtra("update");
     }
 
-    public void insertIntoDB(String text) {
-        MyDatabaseHelper helper = new MyDatabaseHelper(getApplicationContext());
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-
-        values.put(helper.getDateFieldName(), getDate());
-        values.put(helper.getTextFieldName(), text);
-        db.insert(helper.getDatabaseName(), null, values);
-
+    public void countNote() {
         selectCounterDB();
         counterDBHelper.addCounter();
         insertIntoCounterDB();
     }
 
+    public void insertAndCountNote(String text) {
+        NoteDBHelper helper = new NoteDBHelper(getApplicationContext());
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(helper.getDateFieldName(), getDate()); //TODO : Object로 넣는게 좋은지 확인
+        values.put(helper.getTextFieldName(), text);
+        db.insert(helper.getDatabaseName(), null, values);
+
+        countNote();
+    }
+
     public void selectCounterDB() {
         SQLiteDatabase db = counterDBHelper.getReadableDatabase();
-        Cursor c = db.query(counterDBHelper.getDatabaseName(), null, null, null, null, null, null);
+        String sql = "SELECT " + counterDBHelper.getCounterFieldName() + " FROM " + counterDBHelper.getDatabaseName();
+        Cursor c = db.rawQuery(sql, null);
         int counterIndex = c.getColumnIndex(counterDBHelper.getCounterFieldName());
-//TODO : 하나만 가져오기
         int counter;
         if (c.moveToFirst()) {
             while (c.moveToNext()) {
@@ -111,7 +114,6 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
             }
         }
         c.close();
-
     }
 
     public void insertIntoCounterDB() {

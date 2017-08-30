@@ -23,19 +23,20 @@ public class NoteList extends AppCompatActivity {
     private static Adapter mAdapter;
     private static ArrayList<ListViewItem> mList;
     private RecyclerView mListView;
-    static MyDatabaseHelper myDatabaseHelper;
+    static NoteDBHelper noteDBHelper;
     static SQLiteDatabase db;
     static CounterDBHelper counterDBHelper;
-
+    static Context context;
+    //TODO : 에이싱크 테스크에서 리스트 불러오기 , 불러오기 이전에 종료할시 예외 처리
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_list);
 
-        Context context = getApplicationContext();
+        context = getApplicationContext();
         counterDBHelper = new CounterDBHelper(context);
-        myDatabaseHelper = new MyDatabaseHelper(context);
-        db = myDatabaseHelper.getReadableDatabase();
+        noteDBHelper = new NoteDBHelper(context);
+        db = noteDBHelper.getReadableDatabase();
         mList = new ArrayList<>();
         mList = initList();
         mAdapter = new Adapter(mList);
@@ -45,13 +46,12 @@ public class NoteList extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        //TODO : 카운터 업데이트(삭제시)
-//        db.execSQL("DELETE FROM Memo");
+
+//      db.execSQL("DELETE FROM Memo");
         updateAdapter();
         hideActionBar();
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(new LinearLayoutManager(this));
-        Log.i("카운터", Integer.toString(counterDBHelper.getCounter()));
     }
 
     public static ArrayList<ListViewItem> initList() {
@@ -69,6 +69,7 @@ public class NoteList extends AppCompatActivity {
                 } else {
                     list.add(addItem(temp.get(i).getId(), null, temp.get(i).getDate(), 0));
                     list.add(addItem(temp.get(i).getId(), temp.get(i).getMemo(), null, 1));
+                    preDate = temp.get(i).getDate();
                 }
             }
         }
@@ -95,7 +96,7 @@ public class NoteList extends AppCompatActivity {
                 int id = item.getItemId();
                 switch (id)
                 {
-                    case R.id.menu_delete: deleteDB(position);
+                    case R.id.menu_delete: deleteNoteAndSubCounter(position);
                         updateAdapter();
                         break;
                     case R.id.menu_update:
@@ -118,23 +119,56 @@ public class NoteList extends AppCompatActivity {
         mList.addAll(initList());
         mAdapter.notifyDataSetChanged();
     }
-    public static void deleteDB(int position) {
-        db = myDatabaseHelper.getWritableDatabase();
+
+    public static void deleteNoteAndSubCounter(int position) {
+        db = noteDBHelper.getWritableDatabase();
         String id = Integer.toString(mList.get(position).getId());
-        db.delete(myDatabaseHelper.getDatabaseName(), myDatabaseHelper.getIdFieldName() + "=" + id, null);
-        Log.i(myDatabaseHelper.getDatabaseName(), mList.get(position).getId() + " : " + mList.get(position).getMemo() + "정상적으로 삭제 되었습니다.");
+        db.delete(noteDBHelper.getDatabaseName(), noteDBHelper.getIdFieldName() + "=" + id, null);
+        Log.i(noteDBHelper.getDatabaseName(), mList.get(position).getId() + " : " + mList.get(position).getMemo() + "정상적으로 삭제 되었습니다.");
+
+        subCountNote();
+    }
+
+    public static void subCountNote() {
+        selectCounterDB();
+        counterDBHelper.subCounter();
+        insertIntoCounterDB();
+    }
+
+    public static void selectCounterDB() {
+        SQLiteDatabase db = counterDBHelper.getReadableDatabase();
+        String sql = "SELECT " + counterDBHelper.getCounterFieldName() + " FROM " + counterDBHelper.getDatabaseName();
+        Cursor c = db.rawQuery(sql, null);
+        int counterIndex = c.getColumnIndex(counterDBHelper.getCounterFieldName());
+        int counter;
+        if (c.moveToFirst()) {
+            while (c.moveToNext()) {
+                counter = Integer.valueOf(c.getString(counterIndex));
+                counterDBHelper.setCounter(counter);
+            }
+        }
+        c.close();
+    }
+
+    public static void insertIntoCounterDB() {
+        CounterDBHelper helper = new CounterDBHelper(context);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(helper.getCounterFieldName(), counterDBHelper.getCounter());
+        db.insert(helper.getDatabaseName(), null, values);
     }
 
     public static void updateDB (int position, String memo) {
-        db = myDatabaseHelper.getWritableDatabase();
+        db = noteDBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(myDatabaseHelper.getTextFieldName(), memo);
-        db.update(myDatabaseHelper.getDatabaseName(), values, myDatabaseHelper.getIdFieldName() + "=" + mList.get(position).getId(), null);
-        Log.i(myDatabaseHelper.getDatabaseName(), mList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
+        values.put(noteDBHelper.getTextFieldName(), memo);
+        db.update(noteDBHelper.getDatabaseName(), values, noteDBHelper.getIdFieldName() + "=" + mList.get(position).getId(), null);
+        Log.i(noteDBHelper.getDatabaseName(), mList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
     }
 
     public static ArrayList<ListViewItem> selectDB() {
-        Cursor c = db.query(myDatabaseHelper.getDatabaseName(), null, null, null, null, null, null);
+        Cursor c = db.query(noteDBHelper.getDatabaseName(), null, null, null, null, null, null);
         int dateIndex = c.getColumnIndex("date");
         int textIndex = c.getColumnIndex("text");
         int idIndex = c.getColumnIndex("id");
