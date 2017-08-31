@@ -1,4 +1,4 @@
-package com.example.jack.thousandorigamicranes;
+package com.example.jack.thousandorigamicranes.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -25,12 +25,12 @@ public class CounterDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(DATABASE_CREATE);
-        Log.w(com.example.jack.thousandorigamicranes.CounterDBHelper.class.getName(), "table " + DATABASE_NAME + " has created");
+        Log.w(CounterDBHelper.class.getName(), "table " + DATABASE_NAME + " has created");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        Log.w(com.example.jack.thousandorigamicranes.CounterDBHelper.class.getName(),
+        Log.w(CounterDBHelper.class.getName(),
                 "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
         database.execSQL("DROP TABLE IF EXISTS " + DATABASE_NAME);

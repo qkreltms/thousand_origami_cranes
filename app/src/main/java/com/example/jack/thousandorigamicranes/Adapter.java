@@ -1,5 +1,6 @@
 package com.example.jack.thousandorigamicranes;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jack.thousandorigamicranes.data.ListViewItem;
+
 import java.util.ArrayList;
 
 class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>  {
@@ -16,8 +19,12 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>  {
     private ArrayList<ListViewItem> mDataset;
 
     // 1. 어뎁터에서 데이터를 받는다
-    public Adapter(ArrayList<ListViewItem> myDataset) {
-        mDataset = myDataset;
+    public Adapter(ArrayList<ListViewItem> data) {
+        mDataset = data;
+    }
+
+    public void setData(ArrayList<ListViewItem> myDataset) {
+        this.mDataset = myDataset;
     }
 
     // 2. 뷰가 처음 생성시 만들어준다

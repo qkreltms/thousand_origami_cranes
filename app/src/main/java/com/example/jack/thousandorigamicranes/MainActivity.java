@@ -1,17 +1,17 @@
 package com.example.jack.thousandorigamicranes;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+
+import com.example.jack.thousandorigamicranes.data.CounterDBHelper;
+import com.example.jack.thousandorigamicranes.notification.Alram;
 
 public class MainActivity extends AppCompatActivity {
     ImageButton bottle;
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         setBottleImage(this);
+        new Alram(getApplicationContext()).start();
         hideActionBar();
     }
 
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         if (countNote(context) >= 10) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle2, null));
-            }
+            } //TODO : 삭제시 10개 이하로 내려가면 다시 바뀌도록
         }
     }
 
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public int countNote(Context context) {
-        CounterDBHelper counterDBHelper =  new CounterDBHelper(context);
+        CounterDBHelper counterDBHelper = new CounterDBHelper(context);
         selectDB(counterDBHelper);
         return counterDBHelper.getCounter();
     }

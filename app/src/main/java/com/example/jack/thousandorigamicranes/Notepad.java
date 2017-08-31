@@ -9,6 +9,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
+import com.example.jack.thousandorigamicranes.data.CounterDBHelper;
+import com.example.jack.thousandorigamicranes.data.NoteDBHelper;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;

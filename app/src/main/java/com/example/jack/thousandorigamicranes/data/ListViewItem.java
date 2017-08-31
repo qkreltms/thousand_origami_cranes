@@ -1,4 +1,4 @@
-package com.example.jack.thousandorigamicranes;
+package com.example.jack.thousandorigamicranes.data;
 
 /**
  * Created by jack on 2017-08-23.

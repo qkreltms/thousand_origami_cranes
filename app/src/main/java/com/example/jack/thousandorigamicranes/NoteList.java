@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,16 +19,23 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.jack.thousandorigamicranes.data.CounterDBHelper;
+import com.example.jack.thousandorigamicranes.data.ListViewItem;
+import com.example.jack.thousandorigamicranes.data.MemoAsyncTaskLoader;
+import com.example.jack.thousandorigamicranes.data.NoteDBHelper;
+
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class NoteList extends AppCompatActivity {
     private static Adapter mAdapter;
-    private static ArrayList<ListViewItem> mList;
     private RecyclerView mListView;
     static NoteDBHelper noteDBHelper;
     static SQLiteDatabase db;
     static CounterDBHelper counterDBHelper;
     static Context context;
+    private static ArrayList<ListViewItem> mList;
+
     //TODO : 에이싱크 테스크에서 리스트 불러오기 , 불러오기 이전에 종료할시 예외 처리
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +47,6 @@ public class NoteList extends AppCompatActivity {
         noteDBHelper = new NoteDBHelper(context);
         db = noteDBHelper.getReadableDatabase();
         mList = new ArrayList<>();
-        mList = initList();
         mAdapter = new Adapter(mList);
         mListView = (RecyclerView) findViewById(R.id.list_show_memo);
     }
@@ -52,32 +60,6 @@ public class NoteList extends AppCompatActivity {
         hideActionBar();
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(new LinearLayoutManager(this));
-    }
-
-    public static ArrayList<ListViewItem> initList() {
-        ArrayList<ListViewItem> temp = selectDB();
-        ArrayList<ListViewItem> list = new ArrayList<>();
-        int tempSize = temp.size()-1;
-
-        if (tempSize >= 0) {
-            String preDate = temp.get(tempSize).getDate();
-
-            list.add(addItem(temp.get(tempSize).getId(), null, temp.get(tempSize).getDate(), 0));
-            for (int i = tempSize; i >= 0; i--) {
-                if (preDate.equals(temp.get(i).getDate())) {
-                    list.add(addItem(temp.get(i).getId(), temp.get(i).getMemo(), null, 1));
-                } else {
-                    list.add(addItem(temp.get(i).getId(), null, temp.get(i).getDate(), 0));
-                    list.add(addItem(temp.get(i).getId(), temp.get(i).getMemo(), null, 1));
-                    preDate = temp.get(i).getDate();
-                }
-            }
-        }
-        return list;
-    }
-
-    public static ListViewItem addItem(int id, @Nullable String memo, @Nullable String date, int type) {
-        return  new ListViewItem(id, memo, date, type);
     }
 
     public void hideActionBar() {
@@ -114,12 +96,6 @@ public class NoteList extends AppCompatActivity {
         menu.show();
     }
 
-    public static void updateAdapter() {
-        mList.clear();
-        mList.addAll(initList());
-        mAdapter.notifyDataSetChanged();
-    }
-
     public static void deleteNoteAndSubCounter(int position) {
         db = noteDBHelper.getWritableDatabase();
         String id = Integer.toString(mList.get(position).getId());
@@ -133,6 +109,54 @@ public class NoteList extends AppCompatActivity {
         selectCounterDB();
         counterDBHelper.subCounter();
         insertIntoCounterDB();
+    }
+
+    public static void updateAdapter() {
+        mList.clear();
+        mList.addAll(initList());
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public static ArrayList<ListViewItem> initList() {
+        ArrayList<ListViewItem> temp = selectDB();
+        ArrayList<ListViewItem> list = new ArrayList<>();
+        int tempSize = temp.size()-1;
+
+        if (tempSize >= 0) {
+            String preDate = temp.get(tempSize).getDate();
+
+            list.add(addItem(temp.get(tempSize).getId(), null, temp.get(tempSize).getDate(), 0));
+            for (int i = tempSize; i >= 0; i--) {
+                if (preDate.equals(temp.get(i).getDate())) {
+                    list.add(addItem(temp.get(i).getId(), temp.get(i).getMemo(), null, 1));
+                } else {
+                    list.add(addItem(temp.get(i).getId(), null, temp.get(i).getDate(), 0));
+                    list.add(addItem(temp.get(i).getId(), temp.get(i).getMemo(), null, 1));
+                    preDate = temp.get(i).getDate();
+                }
+            }
+        }
+        return list;
+    }
+
+    public static ListViewItem addItem(int id, @Nullable String memo, @Nullable String date, int type) {
+        return  new ListViewItem(id, memo, date, type);
+    }
+
+    public static ArrayList<ListViewItem> selectDB() {
+        Cursor c = db.query(noteDBHelper.getDatabaseName(), null, null, null, null, null, null);
+        int dateIndex = c.getColumnIndex("date");
+        int textIndex = c.getColumnIndex("text");
+        int idIndex = c.getColumnIndex("id");
+        ArrayList<ListViewItem> list = new ArrayList<>();
+        if (c.moveToFirst()) {
+            do {
+                list.add(new ListViewItem(Integer.valueOf(c.getString(idIndex)), c.getString(textIndex), c.getString(dateIndex)));
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return list;
     }
 
     public static void selectCounterDB() {
@@ -165,21 +189,5 @@ public class NoteList extends AppCompatActivity {
         values.put(noteDBHelper.getTextFieldName(), memo);
         db.update(noteDBHelper.getDatabaseName(), values, noteDBHelper.getIdFieldName() + "=" + mList.get(position).getId(), null);
         Log.i(noteDBHelper.getDatabaseName(), mList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
-    }
-
-    public static ArrayList<ListViewItem> selectDB() {
-        Cursor c = db.query(noteDBHelper.getDatabaseName(), null, null, null, null, null, null);
-        int dateIndex = c.getColumnIndex("date");
-        int textIndex = c.getColumnIndex("text");
-        int idIndex = c.getColumnIndex("id");
-        ArrayList<ListViewItem> list = new ArrayList<>();
-        if (c.moveToFirst()) {
-            do {
-                list.add(new ListViewItem(Integer.valueOf(c.getString(idIndex)), c.getString(textIndex), c.getString(dateIndex)));
-            } while (c.moveToNext());
-        }
-        c.close();
-
-        return list;
     }
 }
