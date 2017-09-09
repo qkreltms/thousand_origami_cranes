@@ -8,7 +8,7 @@ import android.util.Log;
 public class NoteDBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Memo";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 2; //TODO : 1로 다시 바꿀 수 없나?
     private static final String ID = "id";
     private static final String DATE = "date";
     private static final String TEXT = "text";

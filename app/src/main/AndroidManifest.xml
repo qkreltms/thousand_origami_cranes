@@ -21,6 +21,6 @@
             android:windowSoftInputMode="adjustResize"
             />
         <activity android:name=".NoteList"></activity>
-        <receiver android:name=".notification.BroadCast"></receiver>
+        <receiver android:name=".notification.BroadcastForNotification"></receiver>
     </application>
 </manifest>
