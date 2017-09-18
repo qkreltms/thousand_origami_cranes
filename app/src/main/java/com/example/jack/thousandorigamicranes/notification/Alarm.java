@@ -25,21 +25,17 @@ public class Alarm {
         PendingIntent sender = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 3);
-        calendar.set(Calendar.MINUTE, 03);
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        //TODO : 알람 설정한 시간에 노티피케이션 작동 되도록
         long triggerTime = calendar.getTimeInMillis();
         long repeatTime = AlarmManager.INTERVAL_DAY;
         //과거 시간일 경우 하루 더해줌으로써 노티피케이션 안나오게
         if (Calendar.getInstance().getTimeInMillis() - triggerTime > 0) {
             triggerTime = triggerTime + repeatTime;
         }
-//        Log.i("켈린터 시간", Long.toString(Calendar.getInstance().getTimeInMillis()));
-//        Log.i("트리거 시간", Long.toString(triggerTime));
-//        Log.i("시스템 시간", Long.toString(System.currentTimeMillis()));
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, repeatTime, sender);
     }
 

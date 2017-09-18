@@ -66,7 +66,7 @@ public class NoteList extends AppCompatActivity {
         getSupportActionBar().hide();
     }
 
-    public static void showPopUpMenu(final View view, final int position)
+    public static void showPopUpMenu(final View view, final int position) //TODO : 체크리스트 뜨도록 업그레이드
     {
         PopupMenu menu = new PopupMenu (view.getContext(), view);
         menu.setOnMenuItemClickListener (new PopupMenu.OnMenuItemClickListener ()

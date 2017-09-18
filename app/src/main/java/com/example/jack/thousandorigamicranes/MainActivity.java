@@ -34,25 +34,17 @@ public class MainActivity extends AppCompatActivity {
         hideActionBar();
     }
 
-    public void setBottleImage(Context context) { //TODO : 여기 리펙토링 할것
+    public void setBottleImage(Context context) {
         int count = countNote(context);
-        if (count < 10) {
+        if (count > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.glass_bottle, null));
-            } else {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.glass_bottle));
-            }
-        } else if (count >= 10 && count < 15) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle2, null));
-            } else {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle2));
-            }
-        } else if (count >= 15) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle3, null));
-            } else {
-                bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle3));
+                if (count < 10) {
+                    bottle.setImageDrawable(getResources().getDrawable(R.drawable.glass_bottle, null));
+                } else if (count >= 10 && count < 15) {
+                    bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle2, null));
+                } else if (count >= 15) {
+                    bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle3, null));
+                }
             }
         }
     }

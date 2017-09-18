@@ -55,14 +55,14 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     }
 
     public void hideActionBar() {
-        getSupportActionBar().hide(); //TODO : theme 바꾸면 된다는데 자세히 알아보기
+        getSupportActionBar().hide();
     }
 
     private String getDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(
-                "yyyy MM dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd", Locale.getDefault());
+        SimpleDateFormat dayOfTheWeekFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
         Date date = new Date();
-        return dateFormat.format(date); //TODO : 월 화수목금토일 넣기
+        return dateFormat.format(date) + " " + dayOfTheWeekFormat.format(date);
     }
 
     public boolean checkDataIsNull() {

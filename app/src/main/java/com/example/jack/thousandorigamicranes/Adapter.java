@@ -55,7 +55,6 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>  {
                 @Override
                 public boolean onLongClick(View view) {
                     NoteList.showPopUpMenu(view, position);
-                    Toast.makeText(view.getContext(), Integer.toString(position), Toast.LENGTH_SHORT).show();
                     return false;
                 }
             });

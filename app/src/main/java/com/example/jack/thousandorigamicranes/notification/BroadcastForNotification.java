@@ -35,16 +35,16 @@ public class BroadcastForNotification extends BroadcastReceiver {
             builder = new Notification.Builder(context);
         }
         String[] noteListData = selectDB(context);
-        String text = noteListData[0]; //TODO : 리펙토링
-        String date = noteListData[1];
-        if (text.equals("") && date.equals("")) {}
-        else {
-            builder.setSmallIcon(R.drawable.bottle2) //TODO : 노트내용 출력 단, 없을경우 예외처리
+
+        if (noteListData != null) {
+            String text = noteListData[0];
+            String date = noteListData[1];
+            builder.setSmallIcon(R.drawable.bottle2)
                     .setContentTitle(date)
                     .setContentText(text)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.bottle3);
+                    .setSmallIcon(R.drawable.bottle3); //TODO 사진 바꾸기
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 notificationManager.notify(1, builder.build());
             }
@@ -56,12 +56,15 @@ public class BroadcastForNotification extends BroadcastReceiver {
         SQLiteDatabase db = noteDBHelper.getReadableDatabase();
         CounterDBHelper counterDBHelper = new CounterDBHelper(context);
         Cursor c;
-        String selectNumberRandomly = Integer.toString((new Random().nextInt(counterDBHelper.getCounter()) + 1));
-        //TODO : db 카운터 값이 0일때 예외 처리 try catch
-        Log.i("랜덤으로 고른것 테스트", selectNumberRandomly);
-        Log.i("db 카운터 테스트", Integer.toString(counterDBHelper.getCounter()));
+
+        int counterDBCounter = counterDBHelper.getCounter();
+        if (counterDBCounter == 0) {
+            Log.i("countDB", "출력할 데이터 없음");
+            return null;
+        }
+        int random = new Random().nextInt(counterDBCounter) + 1;
+        String selectNumberRandomly = Integer.toString((random));
         String sql = "SELECT * FROM " + noteDBHelper.getDatabaseName() + " WHERE " + noteDBHelper.getIdFieldName() + "=" + selectNumberRandomly;
-        //TODO : 1개 밖에없을때 테스트, 아무것도 없을 때
         c = db.rawQuery(sql, null);
         String text = "";
         String date = "";
