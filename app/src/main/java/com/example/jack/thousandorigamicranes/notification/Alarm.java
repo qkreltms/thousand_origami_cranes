@@ -14,7 +14,6 @@ import java.util.Calendar;
 
 public class Alarm {
     private Context mContext;
-
     public Alarm(Context context) {
         mContext = context;
     }
@@ -36,7 +35,7 @@ public class Alarm {
         if (Calendar.getInstance().getTimeInMillis() - triggerTime > 0) {
             triggerTime = triggerTime + repeatTime;
         }
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, triggerTime, repeatTime, sender);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerTime, repeatTime, sender);
     }
 
 }

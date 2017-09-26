@@ -16,12 +16,12 @@ import com.example.jack.thousandorigamicranes.notification.Alarm;
 
 public class MainActivity extends AppCompatActivity {
     ImageButton bottle;
-
+    //TODO 맨위에 바 색상 바꾸기 알아보기
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setNotibarColor();
         setContentView(R.layout.activity_main);
-
         bottle = (ImageButton) findViewById(R.id.bottle);
     }
 
@@ -46,6 +46,13 @@ public class MainActivity extends AppCompatActivity {
                     bottle.setImageDrawable(getResources().getDrawable(R.drawable.bottle3, null));
                 }
             }
+        }
+    }
+
+    public void setNotibarColor() {
+        //TODO : deprecated 된거 사용 ㄴㄴ
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorCyan));
         }
     }
 

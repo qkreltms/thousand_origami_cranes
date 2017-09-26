@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 /**
  * Created by jack on 2017-08-31.
+ * 사용 x
  * 다 뜯어 고쳐야하므로 다음 앱으로 미룸
  */
 

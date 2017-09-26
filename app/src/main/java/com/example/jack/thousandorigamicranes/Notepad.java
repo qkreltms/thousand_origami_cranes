@@ -3,6 +3,7 @@ package com.example.jack.thousandorigamicranes;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,7 +26,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notepad);
-
+        setNotibarColor();
         mMemo = (EditText) findViewById(R.id.edt_memo);
         mMemo.addTextChangedListener(this);
         counterDBHelper = new CounterDBHelper(this);
@@ -39,6 +40,13 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 //        db.execSQL("DELETE FROM CounterDB");
         setTextIfUpdate();
         hideActionBar();
+    }
+
+    public void setNotibarColor() {
+        //TODO : deprecated 된거 사용 ㄴㄴ
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorCyan));
+        }
     }
 
     public void setTextIfUpdate() {

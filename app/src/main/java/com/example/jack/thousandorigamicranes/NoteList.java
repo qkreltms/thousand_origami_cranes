@@ -41,7 +41,7 @@ public class NoteList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_list);
-
+        setNotibarColor();
         context = getApplicationContext();
         counterDBHelper = new CounterDBHelper(context);
         noteDBHelper = new NoteDBHelper(context);
@@ -60,6 +60,13 @@ public class NoteList extends AppCompatActivity {
         hideActionBar();
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    public void setNotibarColor() {
+        //TODO : deprecated 된거 사용 ㄴㄴ
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorCyan));
+        }
     }
 
     public void hideActionBar() {
