@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
         setBottleImage(this);
         new Alarm(getApplicationContext()).start();
-        hideActionBar();
     }
 
     public void setBottleImage(Context context) {
@@ -54,10 +53,6 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorCyan));
         }
-    }
-
-    public void hideActionBar() {
-        getSupportActionBar().hide();
     }
 
     public void onShowNoteList(View view) {

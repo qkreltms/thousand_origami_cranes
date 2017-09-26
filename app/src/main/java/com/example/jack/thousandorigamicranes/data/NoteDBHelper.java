@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class NoteDBHelper extends SQLiteOpenHelper {
-
+    //TODO 사진 추가기능 넣기 사진 없을 경우 널값처리하기
     private static final String DATABASE_NAME = "Memo";
     private static final int DATABASE_VERSION = 2; //TODO : 1로 다시 바꿀 수 없나?
     private static final String ID = "id";

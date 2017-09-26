@@ -37,6 +37,7 @@ public class NoteList extends AppCompatActivity {
     private static ArrayList<ListViewItem> mList;
 
     //TODO : 에이싱크 테스크에서 리스트 불러오기 , 불러오기 이전에 종료할시 예외 처리
+    //TODO : 사진추가기능
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +58,6 @@ public class NoteList extends AppCompatActivity {
 
 //      db.execSQL("DELETE FROM Memo");
         updateAdapter();
-        hideActionBar();
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -67,10 +67,6 @@ public class NoteList extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setStatusBarColor(getResources().getColor(R.color.colorCyan));
         }
-    }
-
-    public void hideActionBar() {
-        getSupportActionBar().hide();
     }
 
     public static void showPopUpMenu(final View view, final int position) //TODO : 체크리스트 뜨도록 업그레이드
