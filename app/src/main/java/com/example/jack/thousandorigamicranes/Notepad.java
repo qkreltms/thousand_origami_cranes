@@ -7,13 +7,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +19,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -33,18 +30,18 @@ import android.widget.Toast;
 import com.example.jack.thousandorigamicranes.data.CounterDBHelper;
 import com.example.jack.thousandorigamicranes.data.NoteDBHelper;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class Notepad extends AppCompatActivity implements TextWatcher {
-    private EditText mMemo;
-    private String mMemoData;
-    private CounterDBHelper counterDBHelper;
+    private EditText mMemoEditText;
+    private String mMemoText;
+    private String mMemoImgUri;
+    private CounterDBHelper mCounterDBHelper;
     private static final int GALLERY_CODE = 1;
-    private static final int READ_STORAGE_PERMISSION = 1;
+    private static final int READ_STORAGE_PERMISSION = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,22 +49,24 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         setContentView(R.layout.activity_notepad);
         setNotibarColor();
         setToolbar();
-        mMemo = (EditText) findViewById(R.id.edt_memo);
-        mMemo.addTextChangedListener(this);
-        counterDBHelper = new CounterDBHelper(this);
+        mMemoEditText = (EditText) findViewById(R.id.edt_memo);
+        mMemoEditText.addTextChangedListener(this);
+        mCounterDBHelper = new CounterDBHelper(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        SQLiteDatabase db = counterDBHelper.getWritableDatabase();
+        updateNotepad();
+        //카운터 내용 디비 지우기
+//        SQLiteDatabase db = mCounterDBHelper.getWritableDatabase();
 //        db.execSQL("DELETE FROM CounterDB");
-        setTextIfUpdate();
     }
 
     public void setToolbar() {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
+        //TODO : 타이틀이름 xml에서 설정하기
         getSupportActionBar().setTitle("");
     }
 
@@ -108,15 +107,17 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 
     public void addPicture(Intent data) {
         Bitmap bitmap = null;
+
         try {
             bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-            Toast.makeText(this, getPath(data.getData()), Toast.LENGTH_LONG).show();
+            String uri = getPath(data.getData());
+            Toast.makeText(this, uri, Toast.LENGTH_LONG).show();
+            mMemoImgUri = uri;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (bitmap != null) {
-            setPicture(bitmap);
-        }
+
+        setPicture(bitmap);
     }
 
     private void getPictureFromGallery() {
@@ -127,20 +128,23 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     }
 
     public void setPicture(Bitmap bitmap) {
-        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.notepadLayout);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(bitmap);
-        imageView.setLayoutParams(layoutParams);
-        layout.addView(imageView);
+        if (bitmap != null) {
+            ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.notepadLayout);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ImageView imageView = new ImageView(this);
+            //TODO 비트맵 크기 수정 : bitmapfactory, glide, picasso 알아보기
+            imageView.setImageBitmap(bitmap);
+            imageView.setLayoutParams(layoutParams);
+            layout.addView(imageView);
 
-        //사진추가시 레이아웃 바뀜
-        ConstraintSet resetConstraintSet = new ConstraintSet();
-        ConstraintSet applyConstraintSet = new ConstraintSet();
-        resetConstraintSet.clone(layout);
-        applyConstraintSet.clone(layout);
-        applyConstraintSet.constrainHeight(R.id.edt_memo, ConstraintSet.MATCH_CONSTRAINT); //TODO : 이쁘게 만들기
-        applyConstraintSet.applyTo(layout);
+            //사진추가시 레이아웃 바뀜
+            ConstraintSet resetConstraintSet = new ConstraintSet();
+            ConstraintSet applyConstraintSet = new ConstraintSet();
+            resetConstraintSet.clone(layout);
+            applyConstraintSet.clone(layout);
+            applyConstraintSet.constrainHeight(R.id.edt_memo, ConstraintSet.MATCH_CONSTRAINT); //TODO : 이쁘게 만들기
+            applyConstraintSet.applyTo(layout);
+        }
     }
 
     public String getPath(Uri uri) {
@@ -180,7 +184,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         }
     }
 
-    public void setTextIfUpdate() {
+    public void updateNotepad() {
         if (getIntent().hasExtra("update")) {
             setTextAtNotepad();
         }
@@ -189,7 +193,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     public void setTextAtNotepad() {
         String memo = getIntent().getStringArrayExtra("update")[0];
         if (memo.length() > 0) {
-            mMemo.setText(memo);
+            mMemoEditText.setText(memo);
         }
     }
 
@@ -201,7 +205,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     }
 
     public boolean checkDataIsNull() {
-        return (mMemoData == null);
+        return (mMemoText == null);
     }
 
     @Override
@@ -209,10 +213,15 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         super.onBackPressed();
         if (!checkDataIsNull()) {
             if (!isUpdate()) {
-                insertAndCountNote(mMemoData);
+                if (mMemoImgUri == null) {
+                    insertAndCountNote(mMemoText, null);
+                } else {
+                    //TODO : 사진만 들어갈경우 처리
+                    insertAndCountNote(mMemoText, mMemoImgUri);
+                }
             } else {
                 int position = Integer.parseInt(getIntent().getStringArrayExtra("update")[1]);
-                NoteList.updateDB(position, mMemoData);
+                NoteList.updateNoteDB(position, mMemoText);
             }
         }
     }
@@ -223,30 +232,34 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 
     public void countNote() {
         selectCounterDB();
-        counterDBHelper.addCounter();
+        mCounterDBHelper.addCounter();
         insertIntoCounterDB();
     }
 
-    public void insertAndCountNote(String text) {
+    public void insertAndCountNote(String text, @Nullable String uri) {
         NoteDBHelper helper = new NoteDBHelper(getApplicationContext());
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put(helper.getDateFieldName(), getDate());
         values.put(helper.getTextFieldName(), text);
+        if (uri != null) {
+            values.put(helper.getURIFieldName(), uri);
+        }
         db.insert(helper.getDatabaseName(), null, values);
         countNote();
     }
 
     public void selectCounterDB() {
-        SQLiteDatabase db = counterDBHelper.getReadableDatabase();
-        String sql = "SELECT " + counterDBHelper.getCounterFieldName() + " FROM " + counterDBHelper.getDatabaseName();
+        SQLiteDatabase db = mCounterDBHelper.getReadableDatabase();
+        String sql = "SELECT " + mCounterDBHelper.getCounterFieldName() + " FROM " + mCounterDBHelper.getDatabaseName();
         Cursor c = db.rawQuery(sql, null);
-        int counterIndex = c.getColumnIndex(counterDBHelper.getCounterFieldName());
+        int counterIndex = c.getColumnIndex(mCounterDBHelper.getCounterFieldName());
         int counter;
         if (c.moveToFirst()) {
             while (c.moveToNext()) {
                 counter = Integer.valueOf(c.getString(counterIndex));
-                counterDBHelper.setCounter(counter);
+                mCounterDBHelper.setCounter(counter);
             }
         }
         c.close();
@@ -256,7 +269,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         CounterDBHelper helper = new CounterDBHelper(getApplicationContext());
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(helper.getCounterFieldName(), counterDBHelper.getCounter());
+        values.put(helper.getCounterFieldName(), mCounterDBHelper.getCounter());
         db.insert(helper.getDatabaseName(), null, values);
     }
 
@@ -266,7 +279,7 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        mMemoData = String.valueOf(charSequence);
+        mMemoText = String.valueOf(charSequence);
     }
 
     @Override

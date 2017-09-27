@@ -16,26 +16,26 @@ import com.example.jack.thousandorigamicranes.notification.Alarm;
 
 public class MainActivity extends AppCompatActivity {
     ImageButton bottle;
-    //TODO 맨위에 바 색상 바꾸기 알아보기
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setNotibarColor();
         setContentView(R.layout.activity_main);
+        setNotibarColor();
         bottle = (ImageButton) findViewById(R.id.bottle);
+        setBottleImage(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        setBottleImage(this);
         new Alarm(getApplicationContext()).start();
     }
 
     public void setBottleImage(Context context) {
         int count = countNote(context);
         if (count > 0) {
+            //TODO : 나중에 사용자가 사진 바꿀수 있도록 수정하는창 만들기
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (count < 10) {
                     bottle.setImageDrawable(getResources().getDrawable(R.drawable.glass_bottle, null));

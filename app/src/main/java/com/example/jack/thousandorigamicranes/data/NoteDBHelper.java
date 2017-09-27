@@ -8,11 +8,12 @@ import android.util.Log;
 public class NoteDBHelper extends SQLiteOpenHelper {
     //TODO 사진 추가기능 넣기 사진 없을 경우 널값처리하기
     private static final String DATABASE_NAME = "Memo";
-    private static final int DATABASE_VERSION = 2; //TODO : 1로 다시 바꿀 수 없나?
+    private static final int DATABASE_VERSION = 4; //앱 삭제시 1로 바꿀수 있음
     private static final String ID = "id";
     private static final String DATE = "date";
     private static final String TEXT = "text";
-    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS "+DATABASE_NAME +  "("+ID+" INTEGER PRIMARY KEY, "+DATE+" DATETIME, "+TEXT+" TEXT);";
+    private static final String URI = "uri"; //uri는 text로 저장
+    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS "+DATABASE_NAME +  "("+ID+" INTEGER PRIMARY KEY, "+DATE+" DATETIME, "+TEXT+" TEXT, "+URI+" TEXT)";
 
     public NoteDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -50,5 +51,9 @@ public class NoteDBHelper extends SQLiteOpenHelper {
 
     public String getTextFieldName() {
         return TEXT;
+    }
+
+    public String getURIFieldName() {
+        return URI;
     }
 }
