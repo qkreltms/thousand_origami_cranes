@@ -23,16 +23,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setNotibarColor();
         bottle = (ImageButton) findViewById(R.id.bottle);
-        setBottleImage(this);
     }
+
 
     @Override
     protected void onStart() {
         super.onStart();
         new Alarm(getApplicationContext()).start();
+        changeBottleImage(this);
     }
 
-    public void setBottleImage(Context context) {
+    public void changeBottleImage(Context context) {
         int count = countNote(context);
         if (count > 0) {
             //TODO : 나중에 사용자가 사진 바꿀수 있도록 수정하는창 만들기

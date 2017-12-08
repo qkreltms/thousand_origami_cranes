@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,12 +39,13 @@ public class NoteList extends AppCompatActivity {
         setNotibarColor();
         Context mContext = getApplicationContext();
         mAsyncTask = new AsyncTask(mContext);
+        mAsyncTask.execute();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        mAsyncTask.execute();
+    protected void onPause() {
+        super.onPause();
+        mAsyncTask.cancel(true);
     }
 
     private class AsyncTask extends android.os.AsyncTask<Void, Void, Void> {
@@ -77,7 +77,7 @@ public class NoteList extends AppCompatActivity {
             mListView.setAdapter(mAdapter);
             mListView.setLayoutManager(new LinearLayoutManager(context));
             //메모디비 내용 지우기
-            //sSqLiteDatabase.execSQL("DELETE FROM Memo");
+            //sSqLiteDatabase.execSQL("DELETE FROM Memo")
         }
 
         @Override
@@ -109,6 +109,7 @@ public class NoteList extends AppCompatActivity {
                     case R.id.menu_update:
                         Intent intent = new Intent(view.getContext(), Notepad.class);
                         intent.putExtra("update", new String[]{mArrayList.get(position).getMemo(), Integer.toString(position)});
+                        Log.i("Test", "onMenuItemClick: "+position);
                         view.getContext().startActivity(intent);
                         break;
                     default:
@@ -222,7 +223,9 @@ public class NoteList extends AppCompatActivity {
         sSqLiteDatabase = sNoteDBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(sNoteDBHelper.getTextFieldName(), memo);
-        sSqLiteDatabase.update(sNoteDBHelper.getDatabaseName(), values, sNoteDBHelper.getIdFieldName() + "=" + mArrayList.get(position).getId(), null);
-        Log.i(sNoteDBHelper.getDatabaseName(), mArrayList.get(position).getId() + "정상적으로 업데이트 되었습니다.");
+        String id = Integer.toString(mArrayList.get(position).getId());
+        sSqLiteDatabase.update(sNoteDBHelper.getDatabaseName(), values, sNoteDBHelper.getIdFieldName() + "=" + id, null);
+
+        updateAdapter();
     }
 }

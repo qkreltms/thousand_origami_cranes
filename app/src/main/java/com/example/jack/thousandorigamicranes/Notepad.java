@@ -2,6 +2,7 @@ package com.example.jack.thousandorigamicranes;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,34 +15,43 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.jack.thousandorigamicranes.data.CounterDBHelper;
 import com.example.jack.thousandorigamicranes.data.NoteDBHelper;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Notepad extends AppCompatActivity implements TextWatcher {
+public class Notepad extends AppCompatActivity implements TextWatcher, View.OnClickListener {
     private EditText mMemoEditText;
     private String mMemoText;
     private String mMemoImgUri;
     private CounterDBHelper mCounterDBHelper;
     private static final int GALLERY_CODE = 1;
     private static final int READ_STORAGE_PERMISSION = 2;
+    private Context mContext;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +62,10 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         mMemoEditText = (EditText) findViewById(R.id.edt_memo);
         mMemoEditText.addTextChangedListener(this);
         mCounterDBHelper = new CounterDBHelper(this);
+        mContext = this.getApplicationContext();
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(this);
+
     }
 
     @Override
@@ -128,22 +142,19 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     }
 
     public void setPicture(Bitmap bitmap) {
+        //TODO: 레이아웃 인플레이터 사용.
         if (bitmap != null) {
             ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.notepadLayout);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             ImageView imageView = new ImageView(this);
-            //TODO 비트맵 크기 수정 : bitmapfactory, glide, picasso 알아보기
             imageView.setImageBitmap(bitmap);
-            imageView.setLayoutParams(layoutParams);
+            Picasso.with(this)
+                    .load(bitmap.toString())
+                    .resize(1000, 800)
+                    .into(imageView);
             layout.addView(imageView);
+            View v = LayoutInflater.from(mContext).inflate(R.layout.list_view_date, null, false);
+            layout.addView(v);
 
-            //사진추가시 레이아웃 바뀜
-            ConstraintSet resetConstraintSet = new ConstraintSet();
-            ConstraintSet applyConstraintSet = new ConstraintSet();
-            resetConstraintSet.clone(layout);
-            applyConstraintSet.clone(layout);
-            applyConstraintSet.constrainHeight(R.id.edt_memo, ConstraintSet.MATCH_CONSTRAINT); //TODO : 이쁘게 만들기
-            applyConstraintSet.applyTo(layout);
         }
     }
 
@@ -211,12 +222,15 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        update();
+    }
+
+    public void update() {
         if (!checkDataIsNull()) {
             if (!isUpdate()) {
                 if (mMemoImgUri == null) {
                     insertAndCountNote(mMemoText, null);
                 } else {
-                    //TODO : 사진만 들어갈경우 처리
                     insertAndCountNote(mMemoText, mMemoImgUri);
                 }
             } else {
@@ -265,6 +279,8 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
         c.close();
     }
 
+
+
     public void insertIntoCounterDB() {
         CounterDBHelper helper = new CounterDBHelper(getApplicationContext());
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -284,5 +300,17 @@ public class Notepad extends AppCompatActivity implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable editable) {
+    }
+
+    @Override
+    public void onClick(View view) {
+        Log.i("test", "onClick: ");
+        switch (view.getId()) {
+            case R.id.fab :
+                update();
+                finish();
+                Log.i("test", "onClick: ");
+                break;
+        }
     }
 }

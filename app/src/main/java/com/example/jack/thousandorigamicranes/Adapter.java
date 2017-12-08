@@ -72,7 +72,6 @@ class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         } else if (mDataset.get(position).getType() == 2) {
             String imgUri = mDataset.get(position).getUri();
             //TODO : 사진누르면 확대기능 추가
-            //TODO : 업데이트 에러 픽스
             Picasso.with(context)
                     .load(new File(imgUri))
                     .resize(1000, 800)
